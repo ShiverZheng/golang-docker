@@ -1,6 +1,22 @@
 FROM golang:latest
-WORKDIR /root/src
-COPY ./ /root/src
-RUN go env -w GOPROXY=https://goproxy.cn,direct
-RUN go build -o helloworld
-ENTRYPOINT ["./helloworld"]
+
+# 设置必要的环境变量
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+
+# 移动到工作目录：/workspace
+WORKDIR /workspace
+
+# 将代码添加到到容器中
+ADD . /workspace
+
+# 将代码编译成二进制可执行文件app
+RUN cd src && go build -o app .
+
+# 声明服务端口
+EXPOSE 8080
+
+# 启动容器时运行的命令
+CMD ["./src/app"]

@@ -8,7 +8,7 @@ import (
 func main() {
 	http.HandleFunc("/", hello)
 	server := &http.Server{
-		Addr: ":80",
+		Addr: ":8080",
 	}
 	fmt.Println("server startup...")
 	if err := server.ListenAndServe(); err != nil {
