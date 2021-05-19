@@ -12,8 +12,15 @@ WORKDIR /workspace
 # 将代码添加到到容器中
 ADD . /workspace
 
+# 将静态资源打包成二进制
+RUN go get -u github.com/gobuffalo/packr/packr
+
 # 将代码编译成二进制可执行文件app
-RUN cd src && go build -o app .
+RUN cd src \
+    && packr build \
+    && go build -o app . \
+    && packr clean \
+    && rm src
 
 # 声明服务端口
 EXPOSE 8080

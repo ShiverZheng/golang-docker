@@ -3,20 +3,23 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/gobuffalo/packr"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 )
 
 type fileHandler struct {
-	root    http.FileSystem
 	handler http.Handler
 }
 
-func fileServer(root http.FileSystem, h http.Handler) http.Handler {
-	return &fileHandler{root, h}
+func fileServer(h http.Handler) http.Handler {
+	return &fileHandler{h}
 }
 
 type indexHandler struct {
@@ -31,25 +34,37 @@ func (i *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (f *fileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
-	if _, err := os.Stat("./static" + path); os.IsNotExist(err) {
+	box := packr.NewBox("./static")
+
+	fmt.Println(GetAppPath() + "/static" + path)
+	if _, err := box.FindString(path); os.IsNotExist(err) {
 		if err != nil {
-			fmt.Printf("something error ...")
+			fmt.Println(err)
 		}
 		return
 	}
 	f.handler.ServeHTTP(w, r)
 }
 
+func GetAppPath() string {
+	file, _ := exec.LookPath(os.Args[0])
+	path, _ := filepath.Abs(file)
+	index := strings.LastIndex(path, string(os.PathSeparator))
+
+	return path[:index]
+}
+
 func main() {
+	fmt.Println(GetAppPath())
 	mux := http.NewServeMux()
-	staticPath := http.Dir("static")
-	f := fileServer(&staticPath, http.FileServer(staticPath))
+	box := packr.NewBox("./static")
+	f := fileServer(http.FileServer(box))
 	mux.Handle("/", &indexHandler{})
-	mux.Handle("/jd", f)
-	mux.Handle("/pinyou", f)
-	mux.Handle("/pokemon", f)
-	mux.Handle("/suning", f)
-	mux.Handle("/ctrip", f)
+	mux.Handle("/jd/", f)
+	mux.Handle("/pinyou/", f)
+	mux.Handle("/pokemon/", f)
+	mux.Handle("/suning/", f)
+	mux.Handle("/ctrip/", f)
 
 	server := &http.Server{
 		Addr:    ":8080",

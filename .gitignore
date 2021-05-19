@@ -15,3 +15,6 @@
 # vendor/
 
 .idea/
+src/app
+src/src
+**/.DS_Store
