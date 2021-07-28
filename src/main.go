@@ -22,8 +22,7 @@ func fileServer(h http.Handler) http.Handler {
 	return &fileHandler{h}
 }
 
-type indexHandler struct {
-}
+type indexHandler struct { }
 
 func (i *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, err := w.Write([]byte("awesome docker!"))
@@ -65,6 +64,7 @@ func main() {
 	mux.Handle("/pokemon/", f)
 	mux.Handle("/suning/", f)
 	mux.Handle("/ctrip/", f)
+	mux.Handle("/shopping/", f)
 
 	server := &http.Server{
 		Addr:    ":8080",
